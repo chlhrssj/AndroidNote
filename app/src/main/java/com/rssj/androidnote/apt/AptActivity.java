@@ -34,6 +34,7 @@ public class AptActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_apt);
 
+        
     }
 
     @BindClick({R.id.toolbar, R.id.tv1, R.id.tv2})
