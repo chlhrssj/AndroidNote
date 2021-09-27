@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.rssj.androidnote">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AndroidNote">
+        <activity
+            android:name=".apt.AptActivity"
+            android:exported="true" />
+        <activity
+            android:name=".widget.RoundActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ui.main.MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.AndroidNote.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".aidl.MyMessagerService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":remote_message" />
+        <service
+            android:name=".aidl.MyAIDLService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":remote_process">
+            <intent-filter>
+                <action android:name="com.rssj.aidl.TEST" />
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>
