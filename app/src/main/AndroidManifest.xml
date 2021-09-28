@@ -10,6 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidNote">
         <activity
+            android:name=".apt.Apt2Activity"
+            android:exported="true" />
+        <activity
             android:name=".apt.AptActivity"
             android:exported="true" />
         <activity

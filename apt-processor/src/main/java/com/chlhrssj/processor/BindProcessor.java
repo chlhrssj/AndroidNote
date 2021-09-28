@@ -78,38 +78,25 @@ public class BindProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         Set<? extends Element> bindViewElements = roundEnv.getElementsAnnotatedWith(BindView.class);
         Set<? extends Element> bindExtraElements = roundEnv.getElementsAnnotatedWith(BindExtra.class);
-        Set<? extends Element> bindClickElements = roundEnv.getElementsAnnotatedWith(BindExtra.class);
+        Set<? extends Element> bindClickElements = roundEnv.getElementsAnnotatedWith(BindClick.class);
 
-        String packName = "";
+        String packName = "com.rssj.binder";
 
         //遍历所有元素，获取用到注解的所有Activity名字
         Set<TypeElement> actNames = new HashSet<>();
         for (Element element : bindViewElements) {
-            VariableElement variableElement = (VariableElement) element;
             //获取成员变量所在的类的类名
-            TypeElement typeElement = (TypeElement) variableElement.getEnclosingElement();
-            //getQualifiedName()带包名的类名，getSimpleName为不带包名
-            String activityName = typeElement.getQualifiedName().toString();
+            TypeElement typeElement = (TypeElement) element.getEnclosingElement();
             actNames.add(typeElement);
-            packName = processingEnv.getElementUtils().getPackageOf(typeElement).toString();
         }
         for (Element element : bindExtraElements) {
-            VariableElement variableElement = (VariableElement) element;
             //获取成员变量所在的类的类名
-            TypeElement typeElement = (TypeElement) variableElement.getEnclosingElement();
-            //getQualifiedName()带包名的类名，getSimpleName为不带包名
-            String activityName = typeElement.getQualifiedName().toString();
+            TypeElement typeElement = (TypeElement) element.getEnclosingElement();
             actNames.add(typeElement);
-            packName = processingEnv.getElementUtils().getPackageOf(typeElement).toString();
         }
         for (Element element : bindClickElements) {
-            VariableElement variableElement = (VariableElement) element;
-            //获取成员变量所在的类的类名
-            TypeElement typeElement = (TypeElement) variableElement.getEnclosingElement();
-            //getQualifiedName()带包名的类名，getSimpleName为不带包名
-            String activityName = typeElement.getQualifiedName().toString();
+            TypeElement typeElement = (TypeElement) element.getEnclosingElement();
             actNames.add(typeElement);
-            packName = processingEnv.getElementUtils().getPackageOf(typeElement).toString();
         }
 
         if (actNames.size() > 0) {
@@ -131,6 +118,10 @@ public class BindProcessor extends AbstractProcessor {
                 for (Element element : bindViewElements) {
                     VariableElement variableElement = (VariableElement) element;
                     TypeElement typeElement = (TypeElement) variableElement.getEnclosingElement();
+                    if (!element.getModifiers().contains(Modifier.PUBLIC)) {
+                        String error = typeElement.getQualifiedName() + "." + element.getSimpleName() + "对象必须为PUBLIC !!!";
+                        messager.printMessage(Diagnostic.Kind.ERROR, error, element);
+                    }
                     if (activityElement == typeElement) {
                         String vName = variableElement.getSimpleName().toString();
                         int resId = variableElement.getAnnotation(BindView.class).value();
@@ -140,11 +131,14 @@ public class BindProcessor extends AbstractProcessor {
                 for (Element element : bindExtraElements) {
                     VariableElement variableElement = (VariableElement) element;
                     TypeElement typeElement = (TypeElement) variableElement.getEnclosingElement();
+                    if (!element.getModifiers().contains(Modifier.PUBLIC)) {
+                        String error = typeElement.getQualifiedName() + "." + element.getSimpleName() + "变量必须为PUBLIC !!!";
+                        messager.printMessage(Diagnostic.Kind.ERROR, error, element);
+                    }
                     if (activityElement == typeElement && variableElement.getKind().isField()) {
                         String vName = variableElement.getSimpleName().toString();
                         String key = variableElement.getAnnotation(BindExtra.class).value();
                         TypeMirror mirror = variableElement.asType();
-                        messager.printMessage(Diagnostic.Kind.NOTE, mirror.getKind().toString());
                         switch (mirror.getKind()) {
                             case INT:
                                 build.addStatement("target." + vName + " = target.getIntent().getIntExtra(\"" + key + "\", 0)");
@@ -166,10 +160,17 @@ public class BindProcessor extends AbstractProcessor {
                     }
                 }
                 for (Element element : bindClickElements) {
-                    VariableElement variableElement = (VariableElement) element;
-                    TypeElement typeElement = (TypeElement) variableElement.getEnclosingElement();
+                    TypeElement typeElement = (TypeElement) element.getEnclosingElement();
+                    if (!element.getModifiers().contains(Modifier.PUBLIC)) {
+                        String error = typeElement.getQualifiedName() + "." + element.getSimpleName() + "方法必须为PUBLIC !!!";
+                        messager.printMessage(Diagnostic.Kind.ERROR, error, element);
+                    }
                     if (activityElement == typeElement) {
-
+                        int[] key = element.getAnnotation(BindClick.class).value();
+                        for (int i = 0;i < key.length;i++) {
+                            int resId = key[i];
+                            build.addStatement("target.findViewById(" + resId + ").setOnClickListener(v -> {target." + element.getSimpleName() + "(v);})");
+                        }
                     }
                 }
 

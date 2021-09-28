@@ -12,6 +12,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface BindClick {
 
-    long[] value();
+    int[] value();
 
 }

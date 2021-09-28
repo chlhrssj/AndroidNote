@@ -2,6 +2,7 @@ package com.rssj.androidnote.apt;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -15,39 +16,41 @@ import com.rssj.androidnote.R;
 
 public class AptActivity extends AppCompatActivity {
 
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
+//    @BindView(R.id.toolbar)
+//    public Toolbar toolbar;
     @BindView(R.id.tv1)
-    TextView tv1;
+    public TextView tv1;
     @BindView(R.id.tv2)
-    TextView tv2;
+    public TextView tv2;
 
     @BindExtra("title")
-    String title;
+    public String title;
     @BindExtra("int")
-    int int1;
+    public int int1;
     @BindExtra("double")
-    double double1;
+    public double double1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_apt);
 
+        BindUtil.bind(this);
 
+        tv1.setText("" + int1);
+        tv2.setText("" + double1);
     }
 
-    @BindClick({R.id.toolbar, R.id.tv1, R.id.tv2})
-    private void onClick(View v) {
+    @BindClick({R.id.tv1, R.id.tv2})
+    public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.toolbar:
-                finish();
-                break;
             case R.id.tv1:
                 Toast.makeText(this, "TV1被点击!", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.tv2:
-                Toast.makeText(this, "TV2被点击!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(this, Apt2Activity.class);
+                intent.putExtra("desc", "测试测试戛然而止");
+                startActivity(intent);
                 break;
         }
     }
