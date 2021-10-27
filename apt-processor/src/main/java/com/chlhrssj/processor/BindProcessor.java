@@ -122,7 +122,7 @@ public class BindProcessor extends AbstractProcessor {
                         String error = typeElement.getQualifiedName() + "." + element.getSimpleName() + "对象必须为PUBLIC !!!";
                         messager.printMessage(Diagnostic.Kind.ERROR, error, element);
                     }
-                    if (activityElement == typeElement) {
+                    if (activityElement.equals(typeElement)) {
                         String vName = variableElement.getSimpleName().toString();
                         int resId = variableElement.getAnnotation(BindView.class).value();
                         build.addStatement("target." + vName + " = target.findViewById(" + resId + ")");
@@ -135,7 +135,7 @@ public class BindProcessor extends AbstractProcessor {
                         String error = typeElement.getQualifiedName() + "." + element.getSimpleName() + "变量必须为PUBLIC !!!";
                         messager.printMessage(Diagnostic.Kind.ERROR, error, element);
                     }
-                    if (activityElement == typeElement && variableElement.getKind().isField()) {
+                    if (activityElement.equals(typeElement) && variableElement.getKind().isField()) {
                         String vName = variableElement.getSimpleName().toString();
                         String key = variableElement.getAnnotation(BindExtra.class).value();
                         TypeMirror mirror = variableElement.asType();
@@ -165,7 +165,7 @@ public class BindProcessor extends AbstractProcessor {
                         String error = typeElement.getQualifiedName() + "." + element.getSimpleName() + "方法必须为PUBLIC !!!";
                         messager.printMessage(Diagnostic.Kind.ERROR, error, element);
                     }
-                    if (activityElement == typeElement) {
+                    if (activityElement.equals(typeElement)) {
                         int[] key = element.getAnnotation(BindClick.class).value();
                         for (int i = 0;i < key.length;i++) {
                             int resId = key[i];
