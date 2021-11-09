@@ -2,3 +2,4 @@ include ':app'
 rootProject.name = "AndroidNote"
 include ':apt-processor'
 include ':apt-annotation'
+include ':asm-plugin'

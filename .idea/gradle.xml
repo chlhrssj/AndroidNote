@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/apt-annotation" />
             <option value="$PROJECT_DIR$/apt-processor" />
+            <option value="$PROJECT_DIR$/asm-plugin" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
