@@ -8,7 +8,10 @@ repositories {
 dependencies {
     implementation gradleApi()//gradle sdk
     implementation localGroovy()//groovy sdk
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // Android DSL
+    implementation 'com.android.tools.build:gradle:3.6.2'
+    implementation group: 'org.ow2.asm', name: 'asm-commons', version: '9.1'
 }
 
 uploadArchives {

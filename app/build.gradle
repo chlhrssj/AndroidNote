@@ -47,4 +47,7 @@ dependencies {
     implementation project(path: ':apt-annotation')
     annotationProcessor project(path: ':apt-processor')
 
+    //ASM
+    implementation project(path: ':asm-sdk')
+
 }
