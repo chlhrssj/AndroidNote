@@ -5,4 +5,24 @@
   <groupId>com.rssj.asm</groupId>
   <artifactId>asm-plugin</artifactId>
   <version>1.0.0</version>
+  <dependencies>
+    <dependency>
+      <groupId>com.android.tools.build</groupId>
+      <artifactId>gradle</artifactId>
+      <version>4.0.2</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-commons</artifactId>
+      <version>9.1</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.15</version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
 </project>

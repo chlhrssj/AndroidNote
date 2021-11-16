@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'com.rssj.asm'
+    id 'kotlin-android'
 }
 
 android {
@@ -40,14 +41,12 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-//    //ASM
-//    implementation 'com.rssj.asm:asm-plugin:1.0.0'
-
     //APT
     implementation project(path: ':apt-annotation')
     annotationProcessor project(path: ':apt-processor')
 
     //ASM
     implementation project(path: ':asm-sdk')
+    implementation 'commons-codec:commons-codec:1.15'
 
 }

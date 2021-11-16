@@ -10,8 +10,9 @@ dependencies {
     implementation localGroovy()//groovy sdk
 
     // Android DSL
-    implementation 'com.android.tools.build:gradle:3.6.2'
+    implementation 'com.android.tools.build:gradle:4.0.2'
     implementation group: 'org.ow2.asm', name: 'asm-commons', version: '9.1'
+    implementation 'commons-codec:commons-codec:1.15'
 }
 
 uploadArchives {

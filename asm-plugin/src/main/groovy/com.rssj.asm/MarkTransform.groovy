@@ -2,6 +2,7 @@ package com.rssj.asm
 
 import com.android.build.api.transform.Context
 import com.android.build.api.transform.DirectoryInput
+import com.android.build.api.transform.Format
 import com.android.build.api.transform.JarInput
 import com.android.build.api.transform.QualifiedContent
 import com.android.build.api.transform.Transform
@@ -9,19 +10,48 @@ import com.android.build.api.transform.TransformException
 import com.android.build.api.transform.TransformInput
 import com.android.build.api.transform.TransformInvocation
 import com.android.build.api.transform.TransformOutputProvider
+import com.android.build.gradle.internal.pipeline.TransformManager
+
+import org.apache.commons.io.FileUtils
+import org.apache.commons.codec.digest.DigestUtils
+import org.gradle.api.Project
+
+import groovy.io.FileType
 
 class MarkTransform extends Transform {
+
+    private static Project project
+
+    MarkTransform(Project project) {
+        this.project = project
+    }
 
     @Override
     String getName() {
         return "RssjMarkTransform"
     }
 
+    /**
+     * 需要处理的数据类型，有两种枚举类型
+     * CLASSES 代表处理的 java 的 class 文件，RESOURCES 代表要处理 java 的资源
+     * @return
+     */
     @Override
     Set<QualifiedContent.ContentType> getInputTypes() {
         return TransformManager.CONTENT_CLASS
     }
 
+    /**
+     * 指 Transform 要操作内容的范围，官方文档 Scope 有 7 种类型：
+     * 1. EXTERNAL_LIBRARIES        只有外部库
+     * 2. PROJECT                   只有项目内容
+     * 3. PROJECT_LOCAL_DEPS        只有项目的本地依赖(本地jar)
+     * 4. PROVIDED_ONLY             只提供本地或远程依赖项
+     * 5. SUB_PROJECTS              只有子项目。
+     * 6. SUB_PROJECTS_LOCAL_DEPS   只有子项目的本地依赖项(本地jar)。
+     * 7. TESTED_CODE               由当前变量(包括依赖项)测试的代码
+     * @return
+     */
     @Override
     Set<? super QualifiedContent.Scope> getScopes() {
         return TransformManager.SCOPE_FULL_PROJECT
@@ -34,41 +64,14 @@ class MarkTransform extends Transform {
 
     @Override
     void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
-        super.transform(transformInvocation)
+//        super.transform(transformInvocation)
         println("===== ASM Transform =====")
         println("${transformInvocation.inputs}")
         println("${transformInvocation.referencedInputs}")
         println("${transformInvocation.outputProvider}")
         println("${transformInvocation.incremental}")
 
-        //当前是否是增量编译
-        boolean isIncremental = transformInvocation.isIncremental()
-        //消费型输入，可以从中获取jar包和class文件夹路径。需要输出给下一个任务
-        Collection<TransformInput> inputs = transformInvocation.getInputs()
-        //引用型输入，无需输出。
-        Collection<TransformInput> referencedInputs = transformInvocation.getReferencedInputs()
-        //OutputProvider管理输出路径，如果消费型输入为空，你会发现OutputProvider == null
-        TransformOutputProvider outputProvider = transformInvocation.getOutputProvider()
-        for (TransformInput input : inputs) {
-            for (JarInput jarInput : input.getJarInputs()) {
-                File dest = outputProvider.getContentLocation(
-                        jarInput.getFile().getAbsolutePath(),
-                        jarInput.getContentTypes(),
-                        jarInput.getScopes(),
-                        Format.JAR)
-                //将修改过的字节码copy到dest，就可以实现编译期间干预字节码的目的了
-                transformJar(jarInput.getFile(), dest)
-            }
-            for (DirectoryInput directoryInput : input.getDirectoryInputs()) {
-                println("== DI = " + directoryInput.file.listFiles().toArrayString())
-                File dest = outputProvider.getContentLocation(directoryInput.getName(),
-                        directoryInput.getContentTypes(), directoryInput.getScopes(),
-                        Format.DIRECTORY)
-                //将修改过的字节码copy到dest，就可以实现编译期间干预字节码的目的了
-                //FileUtils.copyDirectory(directoryInput.getFile(), dest)
-                transformDir(directoryInput.getFile(), dest)
-            }
-        }
+        _transform(transformInvocation.context, transformInvocation.inputs, transformInvocation.outputProvider, transformInvocation.incremental)
     }
 
     void _transform(Context context,
@@ -94,11 +97,8 @@ class MarkTransform extends Transform {
 
                     dir.traverse(type: FileType.FILES, nameFilter: ~/.*\.class/) {
                         File classFile ->
-                            if (MkAnalyticsClassModifier.isShouldModify(classFile.name)) {
-                                File modified = null
-                                if (!sensorsAnalyticsExtension.disableAppClick) {
-                                    modified = MkAnalyticsClassModifier.modifyClassFile(dir, classFile, context.getTemporaryDir())
-                                }
+                            if (MarkClassModifier.isShouldModify(classFile.name)) {
+                                File modified = MarkClassModifier.modifyClassFile(dir, classFile, context.getTemporaryDir())
                                 if (modified != null) {
                                     /**key 为包名 + 类名，如：/cn/sensorsdata/autotrack/android/app/MainActivity.class*/
                                     String ke = classFile.absolutePath.replace(dir.absolutePath, "")
@@ -134,10 +134,7 @@ class MarkTransform extends Transform {
 
                 /** 获得输出文件*/
                 File dest = outputProvider.getContentLocation(destName + "_" + hexName, jarInput.contentTypes, jarInput.scopes, Format.JAR)
-                def modifiedJar = null;
-                if (!sensorsAnalyticsExtension.disableAppClick) {
-                    modifiedJar = MkAnalyticsClassModifier.modifyJar(jarInput.file, context.getTemporaryDir(), true)
-                }
+                def modifiedJar = MarkClassModifier.modifyJar(jarInput.file, context.getTemporaryDir(), true)
                 if (modifiedJar == null) {
                     modifiedJar = jarInput.file
                 }
