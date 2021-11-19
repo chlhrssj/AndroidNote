@@ -24,6 +24,7 @@ import com.rssj.androidnote.R;
 import com.rssj.androidnote.aidl.Book;
 import com.rssj.androidnote.aidl.MyAIDLService;
 import com.rssj.androidnote.aidl.MyMessagerService;
+import com.rssj.androidnote.aop.AopActivity;
 import com.rssj.androidnote.apt.AptActivity;
 
 import static android.content.Context.BIND_AUTO_CREATE;
@@ -55,6 +56,11 @@ public class FirstFragment extends Fragment {
             intent.putExtra("title", "你好APT");
             intent.putExtra("int", 20);
             intent.putExtra("double", 1.5f);
+            startActivity(intent);
+        });
+
+        view.findViewById(R.id.btn_aop).setOnClickListener(l -> {
+            Intent intent = new Intent(getContext(), AopActivity.class);
             startActivity(intent);
         });
     }

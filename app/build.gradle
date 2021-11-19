@@ -47,6 +47,5 @@ dependencies {
 
     //ASM
     implementation project(path: ':asm-sdk')
-    implementation 'commons-codec:commons-codec:1.15'
 
 }

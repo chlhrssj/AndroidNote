@@ -8,6 +8,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.rssj.androidnote.R;
 import com.rssj.androidnote.base.MyAsyncTask;
 import com.rssj.androidnote.widget.RoundActivity;
+import com.rssj.asm.sdk.PointMarkManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        PointMarkManager.getInstance().trackLifecycle(getClass().getName(), "onCreate -- begin");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -36,7 +38,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
 
+    @Override
+    protected void onStart() {
+        int x = 1;
+        super.onStart();
+        int y = 2;
     }
 
     @Override

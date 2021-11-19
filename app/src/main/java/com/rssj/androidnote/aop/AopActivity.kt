@@ -2,9 +2,11 @@ package com.rssj.androidnote.aop
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import com.rssj.androidnote.R
+import com.rssj.asm.sdk.PointMarkManager
 
 class AopActivity : AppCompatActivity() {
 
@@ -34,5 +36,32 @@ class AopActivity : AppCompatActivity() {
             tv.text = "${++num}"
         }
 
+        btnClear.setOnClickListener {
+            PointMarkManager.instance.printEvent()
+        }
+
     }
+
+    override fun onStart() {
+        super.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
+
+
 }

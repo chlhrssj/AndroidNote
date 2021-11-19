@@ -2,6 +2,7 @@ package com.rssj.asm.sdk
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.annotation.Keep
 
 /**
@@ -54,6 +55,15 @@ class PointMarkManager private constructor(app: Application) {
      */
     fun trackLifecycle(className: String, lifecycleEvent: String) {
         trackInfoList.add("$className --- $lifecycleEvent --- ${System.currentTimeMillis()}")
+    }
+
+    /**
+     * 打印记录
+     */
+    fun printEvent() {
+        for (str in trackInfoList) {
+            Log.i("PointMark --- ", str)
+        }
     }
 
 }

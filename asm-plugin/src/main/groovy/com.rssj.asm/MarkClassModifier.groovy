@@ -1,7 +1,6 @@
 package com.rssj.asm
 
 import org.apache.commons.io.IOUtils
-import org.gradle.internal.impldep.org.apache.commons.codec.digest.DigestUtils
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter

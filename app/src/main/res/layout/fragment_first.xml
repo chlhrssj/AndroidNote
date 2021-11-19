@@ -25,6 +25,12 @@
             android:layout_height="wrap_content"
             android:text="@string/aidl"/>
 
+        <Button
+            android:id="@+id/btn_aop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/aop"/>
+
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>
