@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.annotation.Keep
+import java.util.*
 
 /**
  * Create by rssj on 2021/11/11
@@ -22,7 +23,7 @@ class PointMarkManager private constructor(app: Application) {
     }
 
     var application: Application = app
-    var trackInfoList: MutableList<String> = ArrayList()
+    var trackInfoList: MutableList<String> = LinkedList()
 
     /**
      * 点击屏蔽间隔
@@ -48,6 +49,9 @@ class PointMarkManager private constructor(app: Application) {
      */
     fun trackClick(className: String) {
         trackInfoList.add("$className 被点击了 ${System.currentTimeMillis()}")
+        if (trackInfoList.size > 100) {
+            trackInfoList.removeFirst()
+        }
     }
 
     /**
@@ -55,6 +59,9 @@ class PointMarkManager private constructor(app: Application) {
      */
     fun trackLifecycle(className: String, lifecycleEvent: String) {
         trackInfoList.add("$className --- $lifecycleEvent --- ${System.currentTimeMillis()}")
+        if (trackInfoList.size > 100) {
+            trackInfoList.removeFirst()
+        }
     }
 
     /**

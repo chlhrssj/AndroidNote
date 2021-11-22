@@ -21,6 +21,7 @@ class MarkClassVisitor extends ClassVisitor implements Opcodes {
     private String[] mInterfaces
     private ClassVisitor classVisitor
     private String currentSuperClassName
+    private String className
 
     private ActLifecycleHandle actHandle
 
@@ -49,13 +50,14 @@ class MarkClassVisitor extends ClassVisitor implements Opcodes {
         super.visit(version, access, name, signature, superName, interfaces)
         mInterfaces = interfaces
         currentSuperClassName = superName
+        className = name
         if (superName != null) {
             if (superName == superActivity) {
-                println("visit ----> " + version + " " + access + " " + name + " " + signature + " " + superName + " ")
+//                println("visit ----> " + version + " " + access + " " + name + " " + signature + " " + superName + " ")
                 actHandle = new ActLifecycleHandle()
             } else if (superName == superFragment) {
 
-                println("visit ----> " + version + " " + access + " " + name + " " + signature + " " + superName + " ")
+//                println("visit ----> " + version + " " + access + " " + name + " " + signature + " " + superName + " ")
 
             }
         }
@@ -76,7 +78,7 @@ class MarkClassVisitor extends ClassVisitor implements Opcodes {
 
         if (currentSuperClassName == superActivity) {
             //如果属于AppCompatActivity的子类，插入生命周期监听代码
-            println("method ----> " + access + " " + name + " " + desc + " " + signature + " ")
+//            println("method ----> " + access + " " + name + " " + desc + " " + signature + " ")
             if (actHandle.isHandle(name, desc)) {
                 visitMethod = new MarkLifecycleMethodAdapter(visitMethod, access, name, desc, name)
             }
@@ -91,16 +93,18 @@ class MarkClassVisitor extends ClassVisitor implements Opcodes {
 
     @Override
     void visitEnd() {
-
+        if (currentSuperClassName == superActivity) {
+            actHandle.supplementEvent(cv)
+        }
         cv.visitEnd()
     }
-/**
- * 获取方法参数下标为 index 的对应 ASM index
- * @param types 方法参数类型数组
- * @param index 方法中参数下标，从 0 开始
- * @param isStaticMethod 该方法是否为静态方法
- * @return 访问该方法的 index 位参数的 ASM index
- */
+    /**
+     * 获取方法参数下标为 index 的对应 ASM index
+     * @param types 方法参数类型数组
+     * @param index 方法中参数下标，从 0 开始
+     * @param isStaticMethod 该方法是否为静态方法
+     * @return 访问该方法的 index 位参数的 ASM index
+     */
     int getVisitPosition(Type[] types, int index, boolean isStaticMethod) {
         if (types == null || index < 0 || index >= types.length) {
             throw new Error("getVisitPosition error")
