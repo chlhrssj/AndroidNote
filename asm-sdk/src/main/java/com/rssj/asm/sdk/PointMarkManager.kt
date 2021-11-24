@@ -25,29 +25,12 @@ class PointMarkManager private constructor(app: Application) {
     var application: Application = app
     var trackInfoList: MutableList<String> = LinkedList()
 
-    /**
-     * 点击屏蔽间隔
-     */
-    var clickInterval = 400
-    var timer: Long = 0
-
-    /**
-     * 判断是否双击
-     */
-    fun doubleClick(): Boolean {
-        val curr = System.currentTimeMillis()
-        return if (curr - timer < clickInterval) {
-            false
-        } else {
-            timer = curr
-            true
-        }
-    }
 
     /**
      * 点击记录
      */
     fun trackClick(className: String) {
+        Log.i("PointMarkManager", "-----  $className")
         trackInfoList.add("$className 被点击了 ${System.currentTimeMillis()}")
         if (trackInfoList.size > 100) {
             trackInfoList.removeFirst()

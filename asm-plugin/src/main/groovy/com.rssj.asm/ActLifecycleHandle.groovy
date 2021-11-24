@@ -51,8 +51,7 @@ class ActLifecycleHandle {
         } else if (lifeEvent[4] == 0 && ACT_NAME_ON_STOP == methodName && ACT_DESC_ON_STOP == methodDesc) {
             lifeEvent[4] = 1
             return true
-        }
-        else if (lifeEvent[5] == 0 && ACT_NAME_ON_DESTROY == methodName && ACT_DESC_ON_DESTROY == methodDesc) {
+        } else if (lifeEvent[5] == 0 && ACT_NAME_ON_DESTROY == methodName && ACT_DESC_ON_DESTROY == methodDesc) {
             lifeEvent[5] = 1
             return true
         }

@@ -66,10 +66,10 @@ class MarkTransform extends Transform {
     void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
 //        super.transform(transformInvocation)
         println("===== ASM Transform =====")
-        println("${transformInvocation.inputs}")
-        println("${transformInvocation.referencedInputs}")
-        println("${transformInvocation.outputProvider}")
-        println("${transformInvocation.incremental}")
+//        println("${transformInvocation.inputs}")
+//        println("${transformInvocation.referencedInputs}")
+//        println("${transformInvocation.outputProvider}")
+//        println("${transformInvocation.incremental}")
 
         _transform(transformInvocation.context, transformInvocation.inputs, transformInvocation.outputProvider, transformInvocation.incremental)
     }

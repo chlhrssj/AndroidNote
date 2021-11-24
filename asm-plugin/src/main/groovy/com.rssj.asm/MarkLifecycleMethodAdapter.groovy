@@ -36,12 +36,12 @@ class MarkLifecycleMethodAdapter extends AdviceAdapter {
     protected void onMethodEnter() {
 //        println("onMethodEnter 被调用")
         super.onMethodEnter()
-            mv.visitMethodInsn(INVOKESTATIC, "com/rssj/asm/sdk/PointMarkManager", "getInstance", "()Lcom/rssj/asm/sdk/PointMarkManager;", false)
-            mv.visitVarInsn(ALOAD, 0)
-            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false)
-            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;", false)
-            mv.visitLdcInsn("$eventName -- begin".toString())
-            mv.visitMethodInsn(INVOKEVIRTUAL, "com/rssj/asm/sdk/PointMarkManager", "trackLifecycle", "(Ljava/lang/String;Ljava/lang/String;)V", false)
+        mv.visitMethodInsn(INVOKESTATIC, "com/rssj/asm/sdk/PointMarkManager", "getInstance", "()Lcom/rssj/asm/sdk/PointMarkManager;", false)
+        mv.visitVarInsn(ALOAD, 0)
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false)
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;", false)
+        mv.visitLdcInsn("$eventName -- begin".toString())
+        mv.visitMethodInsn(INVOKEVIRTUAL, "com/rssj/asm/sdk/PointMarkManager", "trackLifecycle", "(Ljava/lang/String;Ljava/lang/String;)V", false)
     }
 
     /**

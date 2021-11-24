@@ -18,7 +18,7 @@ import com.rssj.asm.sdk.PointMarkManager
 
 
 
-class AopActivity : AppCompatActivity() {
+class AopActivity : AppCompatActivity(), View.OnClickListener {
 
     lateinit var btnAdd: View
     lateinit var btnSub: View
@@ -44,9 +44,7 @@ class AopActivity : AppCompatActivity() {
             }
         })
 
-        btnAdd.setOnClickListener {
-            tv.text = "${++num}"
-        }
+        btnSub.setOnClickListener(this)
 
         btnClear.setOnClickListener {
             num = 0
@@ -86,10 +84,18 @@ class AopActivity : AppCompatActivity() {
 
     }
 
+    override fun onClick(v: View) {
+        when(v.id) {
+            R.id.btn_sub -> {
+                tv.text = "${--num}"
+            }
+        }
+    }
+
 
 }
 
-class TrackAdapter() :
+class TrackAdapter :
     BaseQuickAdapter<String, BaseViewHolder>(R.layout.item_track) {
 
     override fun convert(helper: BaseViewHolder, item: String) {

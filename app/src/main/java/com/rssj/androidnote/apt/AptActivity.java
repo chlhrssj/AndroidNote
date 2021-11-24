@@ -13,6 +13,7 @@ import com.chlhrssj.annotation.BindClick;
 import com.chlhrssj.annotation.BindExtra;
 import com.chlhrssj.annotation.BindView;
 import com.rssj.androidnote.R;
+import com.rssj.asm.sdk.PointMarkManager;
 
 public class AptActivity extends AppCompatActivity {
 
@@ -39,6 +40,11 @@ public class AptActivity extends AppCompatActivity {
 
         tv1.setText("" + int1);
         tv2.setText("" + double1);
+
+        tv1.setOnClickListener(l -> {
+            tv2.setText("2222");
+        });
+
     }
 
     @BindClick({R.id.tv1, R.id.tv2})

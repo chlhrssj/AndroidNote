@@ -1,6 +1,7 @@
 package com.rssj.asm
 
 import org.objectweb.asm.*
+import org.objectweb.asm.commons.AdviceAdapter
 
 class MarkClassVisitor extends ClassVisitor implements Opcodes {
 
@@ -27,15 +28,6 @@ class MarkClassVisitor extends ClassVisitor implements Opcodes {
 
 //    private HashMap<String, MkAnalyticsMethodCell> mLambdaMethodCells = new HashMap<>()
 
-
-    private
-    static void visitMethodWithLoadedParams(MethodVisitor methodVisitor, int opcode, String owner, String methodName, String methodDesc, int start, int count, List<Integer> paramOpcodes) {
-        for (int i = start; i < start + count; i++) {
-            methodVisitor.visitVarInsn(paramOpcodes[i - start], i)
-        }
-        methodVisitor.visitMethodInsn(opcode, owner, methodName, methodDesc, false)
-    }
-
     /**
      *  visit 可以拿到关于 .class 的所有信息,比如: 当前类所实现的接口列表
      * @param version JDK的版本
@@ -53,11 +45,8 @@ class MarkClassVisitor extends ClassVisitor implements Opcodes {
         className = name
         if (superName != null) {
             if (superName == superActivity) {
-//                println("visit ----> " + version + " " + access + " " + name + " " + signature + " " + superName + " ")
                 actHandle = new ActLifecycleHandle()
             } else if (superName == superFragment) {
-
-//                println("visit ----> " + version + " " + access + " " + name + " " + signature + " " + superName + " ")
 
             }
         }
@@ -86,6 +75,8 @@ class MarkClassVisitor extends ClassVisitor implements Opcodes {
             //如果属于Fragment的子类，插入Fragment生命周期监听代码
 
         }
+
+        visitMethod = new MarkClickMethodAdapter(visitMethod, access, name, desc, className, mInterfaces)
 
         return visitMethod
 

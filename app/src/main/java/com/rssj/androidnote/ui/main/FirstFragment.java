@@ -55,7 +55,7 @@ public class FirstFragment extends Fragment {
             Intent intent = new Intent(getContext(), AptActivity.class);
             intent.putExtra("title", "你好APT");
             intent.putExtra("int", 20);
-            intent.putExtra("double", 1.5f);
+            intent.putExtra("double", 1.5d);
             startActivity(intent);
         });
 
