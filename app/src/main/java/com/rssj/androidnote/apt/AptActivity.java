@@ -41,10 +41,6 @@ public class AptActivity extends AppCompatActivity {
         tv1.setText("" + int1);
         tv2.setText("" + double1);
 
-        tv1.setOnClickListener(l -> {
-            tv2.setText("2222");
-        });
-
     }
 
     @BindClick({R.id.tv1, R.id.tv2})
