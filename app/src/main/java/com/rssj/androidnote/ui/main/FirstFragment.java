@@ -63,5 +63,9 @@ public class FirstFragment extends Fragment {
             Intent intent = new Intent(getContext(), AopActivity.class);
             startActivity(intent);
         });
+
+        view.findViewById(R.id.btn_plugin).setOnClickListener(l -> {
+
+        });
     }
 }

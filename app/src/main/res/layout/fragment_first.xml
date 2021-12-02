@@ -15,21 +15,27 @@
 
         <Button
             android:id="@+id/btn_apt"
-            android:layout_width="wrap_content"
+            android:layout_width="144dp"
             android:layout_height="wrap_content"
             android:text="@string/apt"/>
 
         <Button
             android:id="@+id/btn_aidl"
-            android:layout_width="wrap_content"
+            android:layout_width="144dp"
             android:layout_height="wrap_content"
             android:text="@string/aidl"/>
 
         <Button
             android:id="@+id/btn_aop"
-            android:layout_width="wrap_content"
+            android:layout_width="144dp"
             android:layout_height="wrap_content"
             android:text="@string/aop"/>
+
+        <Button
+            android:id="@+id/btn_plugin"
+            android:layout_width="144dp"
+            android:layout_height="wrap_content"
+            android:text="@string/plugin"/>
 
     </LinearLayout>
 

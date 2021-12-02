@@ -17,11 +17,12 @@
             <option value="$PROJECT_DIR$/apt-processor" />
             <option value="$PROJECT_DIR$/asm-plugin" />
             <option value="$PROJECT_DIR$/asm-sdk" />
+            <option value="$PROJECT_DIR$/pluggable" />
+            <option value="$PROJECT_DIR$/plugin-app" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>
-    <option name="offlineMode" value="true" />
   </component>
 </project>

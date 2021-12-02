@@ -50,5 +50,7 @@ dependencies {
     //ASM
     implementation project(path: ':asm-sdk')
 
+    //Plugin
+    implementation project(path: ':pluggable')
 
 }
