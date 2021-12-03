@@ -6,6 +6,6 @@ package com.rssj.pluggable;
 interface LoadCallback {
 
     void onSuccess();
-    void onFail(Exception e);
+    void onFail(String errMsg);
 
 }
