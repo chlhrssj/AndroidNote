@@ -26,6 +26,7 @@ import com.rssj.androidnote.aidl.MyAIDLService;
 import com.rssj.androidnote.aidl.MyMessagerService;
 import com.rssj.androidnote.aop.AopActivity;
 import com.rssj.androidnote.apt.AptActivity;
+import com.rssj.androidnote.plugin.PluginActivity;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
@@ -65,7 +66,8 @@ public class FirstFragment extends Fragment {
         });
 
         view.findViewById(R.id.btn_plugin).setOnClickListener(l -> {
-
+            Intent intent = new Intent(getContext(), PluginActivity.class);
+            startActivity(intent);
         });
     }
 }
