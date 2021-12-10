@@ -1,8 +1,7 @@
-package com.rssj.androidnote.plugin
+package com.rssj.pluggable
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.rssj.androidnote.R
 
 class StubActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

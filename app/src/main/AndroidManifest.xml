@@ -14,9 +14,6 @@
             android:name=".plugin.PluginActivity"
             android:exported="true" />
         <activity
-            android:name=".plugin.StubActivity"
-            android:exported="true" />
-        <activity
             android:name=".aop.AopActivity"
             android:exported="true" />
         <activity

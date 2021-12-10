@@ -1,5 +1,7 @@
 package com.rssj.androidnote.plugin
 
+import android.content.ComponentName
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -8,8 +10,11 @@ import com.google.android.material.switchmaterial.SwitchMaterial
 import com.rssj.androidnote.R
 import com.rssj.pluggable.DynamicUtil
 import com.rssj.pluggable.LoadCallback
+import java.io.File
 
 class PluginActivity : AppCompatActivity() {
+
+    val apkPath = "plugin.apk"
 
     lateinit var btnLoad: Button
     lateinit var btnOpen: Button
@@ -26,7 +31,7 @@ class PluginActivity : AppCompatActivity() {
                 if (!isLoaded) {
                     DynamicUtil.loadApk(
                         this@PluginActivity,
-                        "plugin.apk",
+                        apkPath,
                         object : LoadCallback {
                             override fun onSuccess() {
                                 isLoaded = true
@@ -60,6 +65,7 @@ class PluginActivity : AppCompatActivity() {
      * 打开插件Activity
      */
     private fun openPlugin() {
-
+        DynamicUtil.startActivity(this, "com.rssj.plugin", "com.rssj.plugin.OtherActivity")
+//        DynamicUtil.startActivity(this, "com.rssj.androidnote", "com.rssj.androidnote.plugin.StubActivity")
     }
 }

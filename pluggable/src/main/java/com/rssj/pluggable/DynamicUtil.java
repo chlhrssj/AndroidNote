@@ -1,6 +1,11 @@
 package com.rssj.pluggable;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.List;
 
 import dalvik.system.DexClassLoader;
 import dalvik.system.PathClassLoader;
@@ -23,6 +29,11 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
  * 插件化工具类
  */
 public class DynamicUtil {
+
+    public static final String PKG = "PLUGIN_PKG";
+    public static final String CLS = "PLUGIN_CLS";
+
+    public static final String STUBCLS = "com.rssj.androidnote.plugin.StubActivity";
 
     private static boolean isLoaded = false;
 
@@ -70,8 +81,8 @@ public class DynamicUtil {
                     @Override
                     public String apply(String absolutePath) throws Throwable {
 
-//                        loadClass(context, absolutePath);
-
+                        loadClass(context, absolutePath);
+                        hook(context);
                         return absolutePath;
 
                     }
@@ -138,12 +149,120 @@ public class DynamicUtil {
     }
 
     /**
-     * 加载APK里面的资源
-     * @param context 上下文
-     * @param apkPath 插件apk的路径
+     * 打开插件APK
      */
-    public static void loadResources(Context context, String apkPath) throws Exception {
+    public static void startActivity(Context context, String pkg, String cls) {
+        Intent intent = new Intent(context, StubActivity.class);
+        intent.putExtra(PKG, pkg);
+        intent.putExtra(CLS, cls);
+        context.startActivity(intent);
+    }
 
+    /**
+     * 针对插件化进行hook
+     */
+    public static void hook(Context context) {
+        hook_mH_sdk29();
+        if (Build.VERSION.SDK_INT >= 29) {
+
+        } else if (Build.VERSION.SDK_INT >= 28) {
+
+        } else if (Build.VERSION.SDK_INT >= 26) {
+
+        } else {
+
+        }
+
+    }
+
+    /**
+     * Hook mH拦截ASM回来的信息
+     */
+    private static void hook_mH_sdk29() {
+        try {
+            //确定hook点，ActivityThread类的mh
+            // 先拿到ActivityThread
+            Class<?> ActivityThreadClz = Class.forName("android.app.ActivityThread");
+            Field field = ActivityThreadClz.getDeclaredField("sCurrentActivityThread");
+            field.setAccessible(true);
+            Object ActivityThreadObj = field.get(null);//OK，拿到主线程实例
+
+            //现在拿mH
+            Field mHField = ActivityThreadClz.getDeclaredField("mH");
+            mHField.setAccessible(true);
+            Handler mHObj = (Handler) mHField.get(ActivityThreadObj);//ok，当前的mH拿到了
+            //再拿它的mCallback成员
+            Field mCallbackField = Handler.class.getDeclaredField("mCallback");
+            mCallbackField.setAccessible(true);
+
+            //2.现在，造一个代理mH，
+            // 他就是一个简单的Handler子类
+            ProxyHandlerCallback proxyMHCallback = new ProxyHandlerCallback();//错，不需要重写全部mH，只需要对mH的callback进行重新定义
+
+            //3.替换
+            //将Handler的mCallback成员，替换成创建出来的代理HandlerCallback
+            mCallbackField.set(mHObj, proxyMHCallback);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static class ProxyHandlerCallback implements Handler.Callback {
+
+        private int EXECUTE_TRANSACTION = 159;//这个值，是android.app.ActivityThread的内部类H 中定义的常量EXECUTE_TRANSACTION
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            boolean result = false;//返回值，请看Handler的源码，dispatchMessage就会懂了
+            //Handler的dispatchMessage有3个callback优先级，首先是msg自带的callback，其次是Handler的成员mCallback,最后才是Handler类自身的handlerMessage方法,
+            //它成员mCallback.handleMessage的返回值为true，则不会继续往下执行 Handler.handlerMessage
+            //我们这里只是要hook，插入逻辑，所以必须返回false，让Handler原本的handlerMessage能够执行.
+            if (msg.what == EXECUTE_TRANSACTION) {//这是跳转的时候,要对intent进行还原
+                try {
+                    //先把相关@hide的类都建好
+                    Class<?> ClientTransactionClz = Class.forName("android.app.servertransaction.ClientTransaction");
+                    Class<?> LaunchActivityItemClz = Class.forName("android.app.servertransaction.LaunchActivityItem");
+
+                    Field mActivityCallbacksField = ClientTransactionClz.getDeclaredField("mActivityCallbacks");//ClientTransaction的成员
+                    mActivityCallbacksField.setAccessible(true);
+                    //类型判定，好习惯
+                    if (!ClientTransactionClz.isInstance(msg.obj)) return false;
+                    Object mActivityCallbacksObj = mActivityCallbacksField.get(msg.obj);//根据源码，在这个分支里面,msg.obj就是 ClientTransaction类型,所以，直接用
+                    //拿到了ClientTransaction的List<ClientTransactionItem> mActivityCallbacks;
+                    List list = (List) mActivityCallbacksObj;
+
+                    if (list.size() == 0) return false;
+                    Object LaunchActivityItemObj = list.get(0);//所以这里直接就拿到第一个就好了
+
+                    if (!LaunchActivityItemClz.isInstance(LaunchActivityItemObj)) return false;
+                    //这里必须判定 LaunchActivityItemClz，
+                    // 因为 最初的ActivityResultItem传进去之后都被转化成了这LaunchActivityItemClz的实例
+
+                    Field mIntentField = LaunchActivityItemClz.getDeclaredField("mIntent");
+                    mIntentField.setAccessible(true);
+                    Intent mIntent = (Intent) mIntentField.get(LaunchActivityItemObj);
+                    if (mIntent != null && mIntent.getComponent() != null) {
+                        String className = mIntent.getComponent().getClassName();
+                        if (className != null && className.equals(STUBCLS)) {
+                            //如果是占位Activity则用真实Activity替代
+                            String readClassName = mIntent.getStringExtra(CLS);
+                            if (readClassName != null && !readClassName.equals("")) {
+//                                mIntent.getComponent()
+                            }
+                        }
+                    }
+//                    Intent oriIntent = (Intent) mIntent.getExtras().get(ORI_INTENT_TAG);
+                    //那么现在有了最原始的intent，应该怎么处理呢？
+                    Log.d("HOOK_RSSJ", "1111111");
+                    mIntentField.set(LaunchActivityItemObj, mIntent);
+                    return false;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return false;
+        }
     }
 
 }

@@ -21,6 +21,7 @@
         <entry key="app/src/main/res/layout/fragment_second.xml" value="0.20104166666666667" />
         <entry key="app/src/main/res/layout/item_track.xml" value="0.42407407407407405" />
         <entry key="app/src/main/res/menu/menu_main.xml" value="0.20104166666666667" />
+        <entry key="pluggable/src/main/res/layout/activity_stub.xml" value="0.20104166666666667" />
         <entry key="plugin-app/src/main/res/layout/activity_other.xml" value="0.20104166666666667" />
       </map>
     </option>
