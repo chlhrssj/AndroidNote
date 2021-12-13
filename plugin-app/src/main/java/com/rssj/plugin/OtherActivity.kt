@@ -20,7 +20,6 @@ class OtherActivity : AppCompatActivity() {
         apkPath = intent.getStringExtra("APK_PATH").toString()
         Log.i("RssjPlugin --- ", " ---- $apkPath")
         handleResources()
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_other)
 
@@ -38,19 +37,24 @@ class OtherActivity : AppCompatActivity() {
         return pluginAssetManager ?: super.getAssets()
     }
 
+    override fun getTheme(): Resources.Theme {
+        return pluginTheme ?: super.getTheme()
+    }
+
     private fun handleResources() {
         Log.i("RssjPlugin --- ", "begin handle")
         try {
             pluginAssetManager = AssetManager::class.java.newInstance()
-            val addAssetPathMethod = pluginAssetManager?.javaClass?.getMethod("addAssetPath", String::class.java)
-            addAssetPathMethod?.invoke(pluginAssetManager, apkPath)
+            val addAssetPathMethod = pluginAssetManager!!.javaClass.getMethod("addAssetPath", String::class.java)
+            addAssetPathMethod.invoke(pluginAssetManager, apkPath)
         } catch (e: Exception) {
             Log.i("RssjPlugin --- ", e.printStackTrace().toString())
 //            e.printStackTrace()
         }
         pluginResources = Resources(pluginAssetManager, super.getResources().displayMetrics, super.getResources().configuration)
-        pluginTheme = pluginResources?.newTheme()
-        pluginTheme?.setTo(super.getTheme())
+        super.setTheme(R.style.Theme_AndroidNote)
+        pluginTheme = pluginResources!!.newTheme()
+        pluginTheme!!.setTo(super.getTheme())
         Log.i("RssjPlugin --- ", "end handle")
     }
 

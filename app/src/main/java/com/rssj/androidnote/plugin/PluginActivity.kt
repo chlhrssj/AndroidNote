@@ -63,7 +63,7 @@ class PluginActivity : AppCompatActivity() {
      * 打开插件Activity
      */
     private fun openPlugin() {
-        DynamicUtil.startActivity(this, "com.rssj.plugin", "com.rssj.plugin.OtherActivity")
+        DynamicUtil.startActivity(this, "com.rssj.androidnote", "com.rssj.plugin.OtherActivity")
 //        DynamicUtil.startActivity(this, "com.rssj.androidnote", "com.rssj.androidnote.plugin.StubActivity")
     }
 }

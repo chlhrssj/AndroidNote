@@ -14,6 +14,9 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.List;
 
 import dalvik.system.DexClassLoader;
@@ -169,9 +172,9 @@ public class DynamicUtil {
     public static void hook(Context context) {
         hook_mH_sdk29();
         if (Build.VERSION.SDK_INT >= 29) {
-
+            hookPMS_sdk29(context);
         } else if (Build.VERSION.SDK_INT >= 28) {
-
+            hookPMS_sdk29(context);
         } else if (Build.VERSION.SDK_INT >= 26) {
 
         } else {
@@ -270,6 +273,50 @@ public class DynamicUtil {
                 }
             }
             return false;
+        }
+    }
+
+    private static void hookPMS_sdk29(Context context) {
+        try {
+            Class<?> ActivityThreadclass = Class.forName("android.app.ActivityThread");
+
+            Field sCurrentActivityThreadFiled = ActivityThreadclass.getDeclaredField(
+                    "sCurrentActivityThread");
+            sCurrentActivityThreadFiled.setAccessible(true);
+            Object sCurrentActivityThread = sCurrentActivityThreadFiled.get(null);
+
+            Field sPackageManagerFiled = ActivityThreadclass.getDeclaredField(
+                    "sPackageManager");
+            sPackageManagerFiled.setAccessible(true);
+            Object sPackageManager = sPackageManagerFiled.get(null);
+
+            Object proxyInstance = Proxy.newProxyInstance(context.getClassLoader(),
+                    sPackageManager.getClass().getInterfaces(),
+                    new PackageManagerHandler(context, sPackageManager));
+
+            sPackageManagerFiled.set(sCurrentActivityThread, proxyInstance);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static class PackageManagerHandler implements InvocationHandler {
+        private Object IPackageManager;
+        private Context context;
+
+        public PackageManagerHandler(Context context, Object IPackageManager) {
+            this.IPackageManager = IPackageManager;
+            this.context = context;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if ("getActivityInfo".equals(method.getName())) {
+                args[0] = new ComponentName(context.getPackageName(), STUBCLS);
+            }
+            return method.invoke(IPackageManager, args);
         }
     }
 
