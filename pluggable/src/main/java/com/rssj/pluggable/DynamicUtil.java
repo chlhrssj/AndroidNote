@@ -1,5 +1,6 @@
 package com.rssj.pluggable;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -33,7 +34,10 @@ public class DynamicUtil {
     public static final String PKG = "PLUGIN_PKG";
     public static final String CLS = "PLUGIN_CLS";
 
-    public static final String STUBCLS = "com.rssj.androidnote.plugin.StubActivity";
+    public static final String STUBCLS = "com.rssj.pluggable.StubActivity";
+
+    public static final String APK_NAME = "plugin.apk";
+    public static final String APK_PATH = "APK_PATH";
 
     private static boolean isLoaded = false;
 
@@ -59,7 +63,7 @@ public class DynamicUtil {
                         }
 
                         //将assets的APK复制到项目私有目录下
-                        InputStream inputStream = context.getAssets().open("plugin.apk");
+                        InputStream inputStream = context.getAssets().open(APK_NAME);
                         File cacheFile = new File(context.getCacheDir(), apkName);
                         if (cacheFile.exists()) {
                             cacheFile.delete();
@@ -155,6 +159,7 @@ public class DynamicUtil {
         Intent intent = new Intent(context, StubActivity.class);
         intent.putExtra(PKG, pkg);
         intent.putExtra(CLS, cls);
+        intent.putExtra(APK_PATH, context.getCacheDir() + File.separator + APK_NAME);
         context.startActivity(intent);
     }
 
@@ -246,14 +251,17 @@ public class DynamicUtil {
                         String className = mIntent.getComponent().getClassName();
                         if (className != null && className.equals(STUBCLS)) {
                             //如果是占位Activity则用真实Activity替代
-                            String readClassName = mIntent.getStringExtra(CLS);
-                            if (readClassName != null && !readClassName.equals("")) {
-//                                mIntent.getComponent()
+                            String realClassName = mIntent.getStringExtra(CLS);
+                            if (realClassName != null && !realClassName.equals("")) {
+//                                ComponentName realComponentName = new ComponentName(mIntent.getComponent().getPackageName(), realClassName);
+                                ComponentName realComponentName = new ComponentName(mIntent.getStringExtra(PKG), realClassName);
+                                mIntent.setComponent(realComponentName);
+//                                Class componentCls = mIntent.getComponent().getClass();
+//                                Field classNameField = componentCls.getDeclaredField("mClass");
                             }
                         }
                     }
 //                    Intent oriIntent = (Intent) mIntent.getExtras().get(ORI_INTENT_TAG);
-                    //那么现在有了最原始的intent，应该怎么处理呢？
                     Log.d("HOOK_RSSJ", "1111111");
                     mIntentField.set(LaunchActivityItemObj, mIntent);
                     return false;

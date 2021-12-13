@@ -14,8 +14,6 @@ import java.io.File
 
 class PluginActivity : AppCompatActivity() {
 
-    val apkPath = "plugin.apk"
-
     lateinit var btnLoad: Button
     lateinit var btnOpen: Button
     lateinit var swLoadState: SwitchMaterial
@@ -31,7 +29,7 @@ class PluginActivity : AppCompatActivity() {
                 if (!isLoaded) {
                     DynamicUtil.loadApk(
                         this@PluginActivity,
-                        apkPath,
+                        DynamicUtil.APK_NAME,
                         object : LoadCallback {
                             override fun onSuccess() {
                                 isLoaded = true
