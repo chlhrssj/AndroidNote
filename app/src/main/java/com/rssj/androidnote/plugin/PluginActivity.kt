@@ -56,7 +56,11 @@ class PluginActivity : AppCompatActivity() {
 
         btnOpen = findViewById<Button>(R.id.btn_open).apply {
             setOnClickListener {
-                openPlugin()
+                if (isLoaded) {
+                    openPlugin()
+                } else {
+                    Toast.makeText(this@PluginActivity, "请先加载apk!", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
