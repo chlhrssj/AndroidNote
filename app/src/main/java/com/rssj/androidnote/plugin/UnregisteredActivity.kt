@@ -1,4 +1,4 @@
-package com.rssj.plugin
+package com.rssj.androidnote.plugin
 
 import android.app.Activity
 import android.content.res.AssetManager
@@ -8,8 +8,17 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.rssj.androidnote.R
+import java.lang.IllegalStateException
 
-class OtherActivity : Activity() {
+/**
+ * Create by rssj on 2021/12/14
+ *
+ * Hook AppCompatActivity大失败，在AppCompatDelegateImpl.setContentView()的时候会判定AppCompatTheme相关属性，
+ * 但是hook了AssetManager之后还是拿不到相关属性，有兴趣再看看这方面的问题
+ *
+ */
+class UnregisteredActivity : Activity() {
 
     lateinit var apkPath: String
 
@@ -18,18 +27,10 @@ class OtherActivity : Activity() {
     private var pluginTheme: Resources.Theme? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        apkPath = intent.getStringExtra("APK_PATH")?:"plugin.apk"
+        apkPath = intent.getStringExtra("APK_PATH").toString()
         handleResources()
         super.onCreate(savedInstanceState)
-        val root = layoutInflater.inflate(R.layout.activity_other, null)
-        Log.i("RSSJ_PLUGIN", root.toString())
-        setContentView(root)
-        val textView = root.findViewById<TextView>(R.id.tv)
-        Log.i("RSSJ_PLUGIN", textView.toString())
-        val str = getString(R.string.plugin_hello)
-        Log.i("RSSJ_PLUGIN", str)
-        textView.text = str
-        root.setBackgroundResource(R.color.white)
+        setContentView(R.layout.activity_aop)
 
     }
 
@@ -40,7 +41,7 @@ class OtherActivity : Activity() {
     override fun getAssets(): AssetManager {
         return pluginAssetManager ?: super.getAssets()
     }
-
+//
 //    override fun getTheme(): Resources.Theme {
 //        return pluginTheme ?: super.getTheme()
 //    }
@@ -54,8 +55,8 @@ class OtherActivity : Activity() {
 //            e.printStackTrace()
         }
         pluginResources = Resources(pluginAssetManager, super.getResources().displayMetrics, super.getResources().configuration)
-//        pluginTheme = pluginResources!!.newTheme()
-//        pluginTheme!!.setTo(super.getTheme())
+        pluginTheme = pluginResources!!.newTheme()
+        pluginTheme!!.setTo(super.getTheme())
     }
 
 }

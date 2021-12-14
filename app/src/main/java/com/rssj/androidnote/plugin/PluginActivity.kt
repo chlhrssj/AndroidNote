@@ -2,6 +2,7 @@ package com.rssj.androidnote.plugin
 
 import android.content.ComponentName
 import android.content.Intent
+import android.content.res.TypedArray
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -21,6 +22,8 @@ class PluginActivity : AppCompatActivity() {
     private var isLoaded: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val a: TypedArray = obtainStyledAttributes(R.styleable.AppCompatTheme)
+        a.recycle()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_plugin)
 
@@ -64,6 +67,7 @@ class PluginActivity : AppCompatActivity() {
      */
     private fun openPlugin() {
         DynamicUtil.startActivity(this, "com.rssj.androidnote", "com.rssj.plugin.OtherActivity")
+//        DynamicUtil.startActivity(this, "com.rssj.androidnote", "com.rssj.androidnote.plugin.UnregisteredActivity")
 //        DynamicUtil.startActivity(this, "com.rssj.androidnote", "com.rssj.androidnote.plugin.StubActivity")
     }
 }
