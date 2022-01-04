@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.rssj.androidnote.IMyAidlInterface;
 import com.rssj.androidnote.R;
@@ -27,6 +28,7 @@ import com.rssj.androidnote.aidl.MyMessagerService;
 import com.rssj.androidnote.aop.AopActivity;
 import com.rssj.androidnote.apt.AptActivity;
 import com.rssj.androidnote.plugin.PluginActivity;
+import com.rssj.androidnote.recycler.RecyclerActivity;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
@@ -67,6 +69,11 @@ public class FirstFragment extends Fragment {
 
         view.findViewById(R.id.btn_plugin).setOnClickListener(l -> {
             Intent intent = new Intent(getContext(), PluginActivity.class);
+            startActivity(intent);
+        });
+
+        view.findViewById(R.id.btn_recycler).setOnClickListener(l -> {
+            Intent intent = new Intent(getContext(), RecyclerActivity.class);
             startActivity(intent);
         });
     }

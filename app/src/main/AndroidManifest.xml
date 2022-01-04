@@ -11,6 +11,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidNote">
         <activity
+            android:name=".recycler.RecyclerActivity"
+            android:exported="true" />
+        <activity
             android:name=".plugin.PluginActivity"
             android:exported="true" />
         <activity

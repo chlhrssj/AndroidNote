@@ -9,6 +9,7 @@
     <string name="aop">AOP</string>
     <string name="plugin">PLUGIN</string>
     <string name="previous">Previous</string>
+    <string name="recycler">RecyclerView</string>
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
