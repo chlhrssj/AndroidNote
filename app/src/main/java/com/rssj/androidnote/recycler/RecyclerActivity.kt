@@ -2,7 +2,9 @@ package com.rssj.androidnote.recycler
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Button
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.BaseViewHolder
@@ -29,8 +31,29 @@ class RecyclerActivity : AppCompatActivity() {
             adapter1.addData(R.color.purple_200)
             adapter1.addData(R.color.purple_500)
             adapter1.addData(R.color.purple_700)
+            adapter1.addData(R.color.purple_200)
+            adapter1.addData(R.color.purple_500)
+            adapter1.addData(R.color.purple_700)
+            adapter1.addData(R.color.purple_200)
+            adapter1.addData(R.color.purple_500)
+            adapter1.addData(R.color.purple_700)
+            adapter1.addData(R.color.purple_200)
+            adapter1.addData(R.color.purple_500)
+            adapter1.addData(R.color.purple_700)
             this.adapter = adapter1
             this.layoutManager = RotationLayoutManager()
+        }
+
+        findViewById<Button>(R.id.btn_scroll_1).apply {
+            setOnClickListener {
+                rv1.scrollToPosition(5)
+            }
+        }
+
+        findViewById<Button>(R.id.btn_smoothscroll_1).apply {
+            setOnClickListener {
+                rv1.smoothScrollToPosition(8)
+            }
         }
 
     }
@@ -39,8 +62,9 @@ class RecyclerActivity : AppCompatActivity() {
 
         override fun convert(helper: BaseViewHolder, item: Int) {
 
-            val imageView = helper.getView<ImageView>(R.id.imageView)
-            imageView.setImageResource(item)
+            val textView = helper.getView<TextView>(R.id.textView)
+            textView.setBackgroundResource(item)
+            textView.text = helper.adapterPosition.toString()
 
         }
 
