@@ -520,7 +520,7 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
         //平滑动画的滚动到中心
 //        smoothOffsetChildren(distance, centerPosition)
         //直接滚动到中心
-
+        scrollToPosition(centerPosition)
 //        dispatchOnItemSelectedListener(centerPosition)
     }
 }
