@@ -1,4 +1,4 @@
-package com.rssj.androidnote.widget
+package com.bgy.widget
 
 import android.graphics.PointF
 import android.util.Log
@@ -53,7 +53,10 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
     private var radius = 0
 
     //选中中间item的监听器的集合
-    var mOnItemSelectedListener: OnItemSelectedListener? = null
+    @Volatile var onItemSelectedListener: OnItemSelectedListener? = null
+
+    //滑动状态
+    var slideState: Int = RecyclerView.SCROLL_STATE_IDLE
 
     override fun generateDefaultLayoutParams(): RecyclerView.LayoutParams {
         return RecyclerView.LayoutParams(
@@ -69,12 +72,14 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
     override fun onLayoutChildren(recycler: RecyclerView.Recycler, state: RecyclerView.State) {
 
         //如果itemCount==0了，直接移除全部view
-        if (mPendingScrollToPosition != RecyclerView.NO_POSITION) {
-            if (state.itemCount == 0) {
-                removeAndRecycleAllViews(recycler)
-                return
-            }
+        if (state.itemCount == 0) {
+            removeAndRecycleAllViews(recycler)
+            return
         }
+
+        //如果不在静止状态，也不触发绘制
+        if (slideState != RecyclerView.SCROLL_STATE_IDLE)
+            return
 
         var currentPosition = 0
         //当childCount != 0时，证明是已经填充过View的，因为有回收
@@ -114,6 +119,7 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
 //        logDebug("位移距离 $dx -- 子view数量 $childCount -- 当前position ${getSelectedPosition()}")
         //填充View，consumed就是修复后的移动值
         val consumed = fillScroll(dx, recycler, state)
+//        logDebug("位移距离 $consumed")
         //移动View
         mOrientationHelper.offsetChildren(-consumed)
         //回收View
@@ -123,7 +129,7 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
         //变换children
         transformChildren()
         //输出children
-        logChildCount("scrollHorizontallyBy", recycler)
+//        logChildCount("scrollHorizontallyBy", recycler)
         return consumed
     }
 
@@ -160,7 +166,7 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
         super.onScrollStateChanged(state)
         if (childCount == 0) return
 //        logDebug("onScrollStateChanged -- $state")
-
+        slideState = state
         if (state == RecyclerView.SCROLL_STATE_IDLE) {
             val centerView = getSelectedView() ?: return
             val centerPosition = getPosition(centerView)
@@ -295,7 +301,7 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
 
         //检查是否滚动到了顶部或者底部
         if (checkScrollToEdge(fillDirection, state)) {
-           return 0
+            return 0
         }
 
         //检查滚动距离是否可以填充下一个view
@@ -308,7 +314,6 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
 
         //
         while (hasMore(state)) {
-            logDebug("需要填充的position $mPendingFillPosition")
             val anchor = getAnchor(fillDirection)
             val child = nextView(recycler, fillDirection)
             if (fillDirection == FILL_START) {
@@ -320,6 +325,7 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
 
             val measureWidth = mOrientationHelper.getDecoratedMeasurement(child)
 
+//            logDebug("需要填充的position $mPendingFillPosition left = ${anchor - measureWidth / 2} right = ${anchor + measureWidth / 2}")
             layoutDecorated(
                 child,
                 anchor - measureWidth / 2,
@@ -515,7 +521,7 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
      * 选中回调事件
      */
     private fun dispatchOnItemSelectedListener() {
-        if (childCount == 0 || mOnItemSelectedListener == null) return
+        if (childCount == 0 || onItemSelectedListener == null) return
 
         val centerView = getSelectedView() ?: return
         val centerPosition = getPosition(centerView)
@@ -525,7 +531,7 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
             val position = getPosition(child)
 
             if (position == centerPosition) {
-                mOnItemSelectedListener?.onSelect(child, position)
+                onItemSelectedListener?.onSelect(child, position)
             }
         }
     }
@@ -539,7 +545,7 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
                 centerView
             ) / 2
         val distance = destination - mOrientationHelper.getDecoratedStart(centerView)
-
+//        logDebug("滑动到中间 --- $centerPosition")
         //平滑动画的滚动到中心
 //        smoothOffsetChildren(distance, centerPosition)
         //直接滚动到中心
