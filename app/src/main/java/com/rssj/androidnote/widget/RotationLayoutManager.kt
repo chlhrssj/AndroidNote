@@ -53,10 +53,10 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
     private var radius = 0
 
     //选中中间item的监听器的集合
-    @Volatile var onItemSelectedListener: OnItemSelectedListener? = null
+    var onItemSelectedListener: OnItemSelectedListener? = null
 
     //滑动状态
-    var slideState: Int = RecyclerView.SCROLL_STATE_IDLE
+    @Volatile var slideState: Int = RecyclerView.SCROLL_STATE_IDLE
 
     override fun generateDefaultLayoutParams(): RecyclerView.LayoutParams {
         return RecyclerView.LayoutParams(
