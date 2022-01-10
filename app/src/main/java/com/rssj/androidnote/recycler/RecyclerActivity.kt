@@ -2,9 +2,11 @@ package com.rssj.androidnote.recycler
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.BaseViewHolder
@@ -41,7 +43,14 @@ class RecyclerActivity : AppCompatActivity() {
             adapter1.addData(R.color.purple_500)
             adapter1.addData(R.color.purple_700)
             this.adapter = adapter1
-            this.layoutManager = RotationLayoutManager()
+            this.layoutManager = RotationLayoutManager().apply {
+                mOnItemSelectedListener = object : RotationLayoutManager.OnItemSelectedListener{
+                    override fun onSelect(view: View, position: Int) {
+                        Toast.makeText(this@RecyclerActivity, "$position 被选中！", Toast.LENGTH_SHORT).show()
+                    }
+
+                }
+            }
         }
 
         findViewById<Button>(R.id.btn_scroll_1).apply {
@@ -52,7 +61,8 @@ class RecyclerActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btn_smoothscroll_1).apply {
             setOnClickListener {
-                rv1.smoothScrollToPosition(8)
+//                rv1.smoothScrollBy(4000,0)
+                rv1.smoothScrollToPosition(12)
             }
         }
 

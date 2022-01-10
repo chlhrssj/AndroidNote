@@ -3,18 +3,17 @@ package com.rssj.androidnote.widget
 import android.graphics.PointF
 import android.util.Log
 import android.view.View
-import android.widget.LinearLayout.HORIZONTAL
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.OrientationHelper
 import androidx.recyclerview.widget.RecyclerView
-import java.lang.Math.abs
+import com.rssj.androidnote.BuildConfig.DEBUG
 import kotlin.math.max
-import kotlin.math.min
 
 /**
  * Create by rssj on 2022/1/4
  */
+
 class RotationLayoutManager : RecyclerView.LayoutManager(),
     RecyclerView.SmoothScroller.ScrollVectorProvider {
 
@@ -29,7 +28,6 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
 
     }
 
-    private var mPendingPosition = RecyclerView.NO_POSITION
 
     //将要滚到的position
     private var mPendingScrollToPosition: Int = RecyclerView.NO_POSITION
@@ -54,6 +52,9 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
     //每个item中点的距离
     private var radius = 0
 
+    //选中中间item的监听器的集合
+    var mOnItemSelectedListener: OnItemSelectedListener? = null
+
     override fun generateDefaultLayoutParams(): RecyclerView.LayoutParams {
         return RecyclerView.LayoutParams(
             RecyclerView.LayoutParams.MATCH_PARENT,
@@ -67,6 +68,14 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
 
     override fun onLayoutChildren(recycler: RecyclerView.Recycler, state: RecyclerView.State) {
 
+        //如果itemCount==0了，直接移除全部view
+        if (mPendingScrollToPosition != RecyclerView.NO_POSITION) {
+            if (state.itemCount == 0) {
+                removeAndRecycleAllViews(recycler)
+                return
+            }
+        }
+
         var currentPosition = 0
         //当childCount != 0时，证明是已经填充过View的，因为有回收
         //所以直接赋值为第一个child的position就可以
@@ -74,8 +83,8 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
             currentPosition = getPosition(getChildAt(0)!!)
         }
 
-        if (mPendingPosition != RecyclerView.NO_POSITION) {
-            currentPosition = mPendingPosition
+        if (mPendingScrollToPosition != RecyclerView.NO_POSITION) {
+            currentPosition = mPendingScrollToPosition
         }
 
         //轻量级的将view移除屏幕
@@ -85,7 +94,7 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
         fillLayout(recycler, state, currentPosition)
 
         //分发Item Fill事件
-        dispatchOnItemFillListener()
+        dispatchOnItemSelectedListener()
 //        logChildCount("onLayoutChildren", recycler)
     }
 
@@ -102,24 +111,25 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
         recycler: RecyclerView.Recycler,
         state: RecyclerView.State
     ): Int {
+//        logDebug("位移距离 $dx -- 子view数量 $childCount -- 当前position ${getSelectedPosition()}")
         //填充View，consumed就是修复后的移动值
         val consumed = fillScroll(dx, recycler, state)
         //移动View
         mOrientationHelper.offsetChildren(-consumed)
         //回收View
         recycleChildren(consumed, recycler)
+//        logDebug("回收后 子view的数量 $childCount")
+
         //变换children
         transformChildren()
-        //分发事件
-        dispatchOnItemFillListener()
         //输出children
-//        logChildCount("scrollHorizontallyBy", recycler)
+        logChildCount("scrollHorizontallyBy", recycler)
         return consumed
     }
 
     override fun scrollToPosition(position: Int) {
         if (position < 0 || position >= itemCount) return
-        mPendingPosition = position
+        mPendingScrollToPosition = position
         requestLayout()
     }
 
@@ -128,9 +138,12 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
         state: RecyclerView.State,
         position: Int
     ) {
-        val linearSmoothScroller =
-            LinearSmoothScroller(recyclerView.context)
-        linearSmoothScroller.targetPosition = position
+        if (childCount == 0) return
+        checkToPosition(position)
+
+        val toPosition = fixSmoothToPosition(position)
+        val linearSmoothScroller = LinearSmoothScroller(recyclerView.context)
+        linearSmoothScroller.targetPosition = toPosition
         startSmoothScroll(linearSmoothScroller)
     }
 
@@ -138,7 +151,7 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
         if (childCount == 0) {
             return null
         }
-        val firstChildPos = getPosition(getChildAt(0)!!)
+        val firstChildPos = getPosition(mSnapHelper.findSnapView(this)!!)
         val direction = if (targetPosition < firstChildPos) -1 else 1
         return PointF(direction.toFloat(), 0f)
     }
@@ -171,7 +184,7 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
         var centerX = 0
         var centerY = 0
 
-        if (currentPosition != 0 && state.itemCount > currentPosition + 1) {
+        if (currentPosition != 0) {
             //左边有view
             centerX = 0
             centerY = (height - paddingTop - paddingBottom) / 2
@@ -267,6 +280,7 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
             removeAndRecycleView(view, recycler)
         }
         recycleViews.clear()
+
     }
 
     private fun fillScroll(
@@ -291,10 +305,10 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
 
         //获取将要填充的view
         mPendingFillPosition = getPendingFillPosition(fillDirection)
-        Log.i(TAG, "$mPendingFillPosition")
 
         //
-        if (remainSpace > 0 && hasMore(state)) {
+        while (hasMore(state)) {
+            logDebug("需要填充的position $mPendingFillPosition")
             val anchor = getAnchor(fillDirection)
             val child = nextView(recycler, fillDirection)
             if (fillDirection == FILL_START) {
@@ -313,6 +327,11 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
                 anchor + measureWidth / 2,
                 height
             )
+
+            remainSpace -= measureWidth + interval
+            if (!(remainSpace > 0 && !canNotFillScroll(fillDirection, remainSpace))) {
+                break
+            }
         }
 
         return delta
@@ -331,20 +350,26 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
         }
     }
 
+    private fun logDebug(msg: String) {
+        if (!DEBUG) return
+        Log.d(TAG, "${hashCode()} -- " + msg)
+    }
+
     /**
      * 如果anchorView的(start或end)+delta还是没出现在屏幕内，
-     * 就继续滚动，不填充view
+     * true继续滚动
+     * false填充新的view
      */
     private fun canNotFillScroll(fillDirection: Int, delta: Int): Boolean {
         val anchorView = getAnchorView(fillDirection)
         return if (fillDirection == FILL_START) {
             val start = mOrientationHelper.getDecoratedStart(anchorView)
 //            Log.i(TAG, "${start + delta} --- $interval")
-            start + delta < interval
+            start + delta <= interval
         } else {
             val end = mOrientationHelper.getDecoratedEnd(anchorView)
 //            Log.i(TAG, "${width - (end + delta)} --- $interval")
-            width - (end + delta) < interval
+            end - delta >= width - interval
         }
     }
 
@@ -487,24 +512,22 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
     }
 
     /**
-     * 分发OnItemFillListener事件
+     * 选中回调事件
      */
-    private fun dispatchOnItemFillListener() {
-//        if (childCount == 0 || mOnItemFillListener.isEmpty()) return
-//
-//        val centerView = getSelectedView() ?: return
-//        val centerPosition = getPosition(centerView)
-//
-//        for (i in 0 until childCount) {
-//            val child = getChildAt(i) ?: continue
-//            val position = getPosition(child)
-//
-//            if (position == centerPosition) {
-//                onItemSelected(child, position)
-//            } else {
-//                onItemUnSelected(child, position)
-//            }
-//        }
+    private fun dispatchOnItemSelectedListener() {
+        if (childCount == 0 || mOnItemSelectedListener == null) return
+
+        val centerView = getSelectedView() ?: return
+        val centerPosition = getPosition(centerView)
+
+        for (i in 0 until childCount) {
+            val child = getChildAt(i) ?: continue
+            val position = getPosition(child)
+
+            if (position == centerPosition) {
+                mOnItemSelectedListener?.onSelect(child, position)
+            }
+        }
     }
 
     /**
@@ -521,6 +544,45 @@ class RotationLayoutManager : RecyclerView.LayoutManager(),
 //        smoothOffsetChildren(distance, centerPosition)
         //直接滚动到中心
         scrollToPosition(centerPosition)
-//        dispatchOnItemSelectedListener(centerPosition)
+        dispatchOnItemSelectedListener()
     }
+
+    /**
+     * 检查toPosition是否合法
+     */
+    private fun checkToPosition(position: Int) {
+        if (position < 0 || position > itemCount - 1)
+            throw IllegalArgumentException("position is $position,must be >= 0 and < itemCount,")
+    }
+
+    /**
+     * 因为scrollTo是要居中，所以这里要fix一下
+     */
+    private fun fixSmoothToPosition(toPosition: Int): Int {
+        val fixCount = getOffsetCount()
+        val centerPosition = getSelectedPosition()
+        return if (centerPosition < toPosition) toPosition + fixCount else toPosition - fixCount
+    }
+
+    /**
+     * 获取偏移的item count
+     * 例如：开始position == 0居中，就要偏移一个item count的距离
+     */
+    private fun getOffsetCount() = 1
+
+    /**
+     * 获取被选中的position
+     */
+    private fun getSelectedPosition(): Int {
+        if (childCount == 0) return RecyclerView.NO_POSITION
+        val centerView = getSelectedView() ?: return RecyclerView.NO_POSITION
+        return getPosition(centerView)
+    }
+
+
+
+    interface OnItemSelectedListener {
+        fun onSelect(view: View, position: Int)
+    }
+
 }
